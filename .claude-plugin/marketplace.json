@@ -1,0 +1,5 @@
+{
+  "name": "cozy-winter-looks",
+  "owner": { "name": "Retyung92" },
+  "plugins": [{ "name": "cozy-looks", "source": "./" }]
+}
