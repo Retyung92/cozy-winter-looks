@@ -7,8 +7,6 @@ Landscape themes for the Claude desktop app: a full color palette for light and 
 | **Snowy Cabin** (default) | Deep-blue winter night: a log cabin with flickering warm windows and chimney smoke, snowy pines, falling snow, twinkling stars and sparkles, a shooting star, a drifting aurora and a glowing moon. In light mode, the same valley on a pale snowy morning. |
 | **Blocky Plains** | Blocky grassy hills under a sky-blue day with drifting square clouds; at night, a square moon and blinking stars. |
 
-Colors were sampled from reference landscapes; all scene art is original vector drawing.
-
 ## Install
 
 At the prompt of a Claude Code terminal session:
