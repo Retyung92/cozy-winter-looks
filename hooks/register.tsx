@@ -19,14 +19,14 @@ const LOOKS: Record<LookId, Look> = {
     problems: cabinColors.problems,
     scene: CABIN_SCENE,
     alt: 'A log cabin with glowing windows in a snowy pine valley under a starry night, snow falling',
-    look: { colors: cabinColors.theme, backdrop: { id: 'cabin', glass: { blur: 16, opacity: 0.7 } } },
+    look: { colors: cabinColors.theme, backdrop: { scene: 'cabin', glass: { blur: 16, opacity: 0.7 } } },
   },
   plains: {
     name: 'Blocky Plains',
     problems: plainsColors.problems,
     scene: PLAINS_SCENE,
     alt: 'Blocky grassy hills under a sky with drifting square clouds',
-    look: { colors: plainsColors.theme, backdrop: { id: 'plains', glass: { blur: 18, opacity: 0.72 } } },
+    look: { colors: plainsColors.theme, backdrop: { scene: 'plains', glass: { blur: 18, opacity: 0.72 } } },
   },
 }
 
@@ -71,7 +71,7 @@ export const register: Register = on => {
   })
 
   on('ui.render', { component: 'Backdrop' }, ($, e, next) => {
-    const id = e.props.id
+    const id = e.props.scene
     if ((e.surface !== 'desktop' && e.surface !== 'mobile') || !isLook(id)) {
       return next(e)
     }
