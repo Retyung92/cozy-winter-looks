@@ -2,6 +2,7 @@ import type { EngineInterface, Register, ThemeSetArgs } from 'claude-code'
 
 import { cabinColors, CABIN_SCENE } from './cabin.js'
 import { plainsColors, PLAINS_SCENE } from './plains.js'
+import { MEMES } from './memes.js'
 
 type LookId = 'cabin' | 'plains'
 
@@ -18,7 +19,7 @@ const LOOKS: Record<LookId, Look> = {
     name: 'Snowy Cabin',
     problems: cabinColors.problems,
     scene: CABIN_SCENE,
-    alt: 'A log cabin with glowing windows in a snowy pine valley under a starry night, snow falling',
+    alt: 'A log cabin hung with blinking New Year lights, a decorated fir with a star, presents and a snowman in a snowy valley, fireworks and snow in the night sky',
     look: { colors: cabinColors.theme, backdrop: { scene: 'cabin', glass: { blur: 16, opacity: 0.7 } } },
   },
   plains: {
@@ -47,11 +48,23 @@ export const register: Register = on => {
       description: 'Switch the landscape look: cabin or plains',
       argumentHint: 'cabin | plains',
     })
+    await $.command.register({
+      name: 'meme',
+      description: 'Новогодний мем про то, как мы переносили тему',
+    })
     const stored = await $.store.get('look')
     const reason = await apply($, isLook(stored) ? stored : DEFAULT)
     if (reason !== undefined) $.ui.status(reason)
 
     return next(e)
+  })
+
+  on('command.run', { command: 'meme' }, async $ => {
+    const seen = await $.store.get('meme')
+    const at = typeof seen === 'number' && Number.isInteger(seen) && seen >= 0 ? seen % MEMES.length : 0
+    await $.store.set('meme', (at + 1) % MEMES.length)
+
+    return { text: `${MEMES[at]}\n\n— мем ${at + 1} из ${MEMES.length}, /meme для следующего` }
   })
 
   on('command.run', { command: 'look' }, async ($, e) => {

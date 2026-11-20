@@ -4,7 +4,7 @@ Landscape themes for the Claude desktop app: a full color palette for light and 
 
 | Look | What you get |
 | --- | --- |
-| **Snowy Cabin** (default) | Deep-blue winter night: a log cabin with flickering warm windows and chimney smoke, snowy pines, falling snow, twinkling stars and sparkles, a shooting star, a drifting aurora and a glowing moon. In light mode, the same valley on a pale snowy morning. |
+| **Snowy Cabin** (default) | Deep-blue New Year night: a log cabin hung with blinking lights and a wreath, a decorated fir with a star, presents, a snowman and fireworks, plus flickering warm windows and chimney smoke, snowy pines, falling snow, twinkling stars and sparkles, a shooting star, a drifting aurora and a glowing moon. In light mode, the same valley on a pale snowy morning. |
 | **Blocky Plains** | Blocky grassy hills under a sky-blue day with drifting square clouds; at night, a square moon and blinking stars. |
 
 ## Install
@@ -30,6 +30,7 @@ In the desktop app, where `/plugin` does not run: click **+** next to the prompt
 - `/look cabin` — Snowy Cabin
 - `/look plains` — Blocky Plains
 - `/look` — switch to the other look
+- `/meme` — a New Year meme about moving this theme from the PC to the laptop (they come in turn)
 
 The choice is remembered across sessions. Themes and scenes are drawn by the desktop and mobile apps; the terminal keeps its own colors.
 

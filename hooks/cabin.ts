@@ -148,6 +148,71 @@ function smoke(): string {
 const glow = (cx: number, cy: number, r: number, cls: string): string =>
   [1, 0.75, 0.5, 0.3].map(k => `<circle class="${cls}" cx="${cx}" cy="${cy}" r="${i(r * k)}"/>`).join('')
 
+// ---- New Year bits. ----
+const BULBS = ['b1', 'b2', 'b3', 'b4']
+
+// Strings of bulbs, each [x0, y0, x1, y1, bulbs, sag], sagging a little. All the
+// bulbs share three groups that blink in turn, so many strings cost three animations.
+function garlands(strings: Array<[number, number, number, number, number, number]>): string {
+  const groups = ['', '', '']
+  let wires = ''
+  for (const [x0, y0, x1, y1, n, sag] of strings) {
+    let wire = `M${x0} ${y0}`
+    for (let k = 0; k <= n; k++) {
+      const t = k / n
+      const x = i(x0 + (x1 - x0) * t)
+      const y = i(y0 + (y1 - y0) * t + sag * Math.sin(t * Math.PI))
+      wire += `L${x} ${y}`
+      groups[k % 3] += `<circle class="${BULBS[k % 4]}" cx="${x}" cy="${y + 5}" r="5"/>`
+    }
+    wires += `<path class="wire" d="${wire}"/>`
+  }
+  return wires + groups.map((g, k) => `<g>${anim('opacity', '1;.25;1', 1.8, k * 0.6)}${g}</g>`).join('')
+}
+
+// The big decorated fir: a pine with baubles, a lit string and a star on top.
+function yolka(x: number, base: number, h: number): string {
+  let out = pine(x, base, h)
+  const balls = ['', '']
+  for (let t = 0; t < 3; t++) {
+    const bot = base - h * 0.1 - (2 - t) * h * 0.2
+    const half = h * 0.42 * (0.55 + t * 0.22)
+    for (let k = 0; k < 3 + t; k++) {
+      const bx = i(x - half * 0.75 + (half * 1.5 * k) / (2 + t))
+      balls[(k + t) % 2] += `<circle class="${BULBS[(k + t) % 4]}" cx="${bx}" cy="${i(bot - 8)}" r="${i(h * 0.022)}"/>`
+    }
+  }
+  out += `<g>${anim('opacity', '1;.55;1', 2.2)}${balls[0]}</g><g>${anim('opacity', '.55;1;.55', 2.2)}${balls[1]}</g>`
+  const top = base - h
+  out += `<g>${anim('opacity', '.5;1;.5', 3)}${glow(x, top, 46, 'starglow')}</g>${spark(x, top, 18).replace('<path', '<path class="star"')}`
+  return out
+}
+
+// Presents under the tree: a box, its ribbon cross and a bow.
+const gift = (x: number, y: number, w: number, h: number, cls: string): string =>
+  `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/><path class="ribbon" d="M${x + w / 2} ${y}v${h}M${x} ${y + h / 2}h${w}"/><circle class="bow" cx="${x + w / 2 - 5}" cy="${y - 3}" r="5"/><circle class="bow" cx="${x + w / 2 + 5}" cy="${y - 3}" r="5"/>`
+
+function snowman(x: number, base: number): string {
+  return `<circle class="sm" cx="${x}" cy="${base - 30}" r="32"/><circle class="sm" cx="${x}" cy="${base - 82}" r="23"/><circle class="sm" cx="${x}" cy="${base - 120}" r="17"/>
+<rect class="hat" x="${x - 14}" y="${base - 158}" width="28" height="24" rx="2"/><rect class="hat" x="${x - 21}" y="${base - 137}" width="42" height="5" rx="2"/>
+<path class="scarf" d="M${x - 17} ${base - 104}h34v7h-34ZM${x + 6} ${base - 99}h8v22h-8Z"/>
+<path class="carrot" d="M${x} ${base - 121}l20 4l-20 4Z"/><circle class="coal" cx="${x - 6}" cy="${base - 126}" r="2.5"/><circle class="coal" cx="${x + 6}" cy="${base - 126}" r="2.5"/>
+<circle class="coal" cx="${x}" cy="${base - 88}" r="3"/><circle class="coal" cx="${x}" cy="${base - 75}" r="3"/>
+<path class="arm" d="M${x - 22} ${base - 85}l-34 -22M${x + 22} ${base - 85}l34 -18"/>`
+}
+
+// A firework: rays and sparks that open from the centre, then fade, once per cycle.
+function burst(cx: number, cy: number, r: number, cls: string, dur: number, begin: number): string {
+  let rays = ''
+  for (let k = 0; k < 14; k++) {
+    const a = (k / 14) * Math.PI * 2
+    const c = Math.cos(a)
+    const s = Math.sin(a)
+    rays += `<path d="M${i(c * r * 0.3)} ${i(s * r * 0.3)}L${i(c * r)} ${i(s * r)}"/><circle cx="${i(c * r * 1.12)}" cy="${i(s * r * 1.12)}" r="3"/>`
+  }
+  return `<g transform="translate(${cx} ${cy})"><g class="${cls}" opacity="0">${anim('opacity', '0;1;.7;0;0;0;0', dur, begin)}<animateTransform attributeName="transform" type="scale" values=".15;1;1.1;1.15;1.15;1.15;1.15" dur="${dur}s" begin="-${begin}s" repeatCount="indefinite"/>${rays}</g></g>`
+}
+
 // Cabin, drawn in its own coordinates and placed at the lower right.
 const CABIN = `<g transform="translate(930 405) scale(.95)">
 <g>${smoke()}</g>
@@ -160,6 +225,8 @@ const CABIN = `<g transform="translate(930 405) scale(.95)">
 <rect class="door" x="272" y="300" width="54" height="95" rx="3"/>
 <path class="roof" d="M118 266L300 152L482 266L470 276L300 170L130 276Z"/>
 <path class="snowroof" d="M106 262L300 140L494 262Q490 274 478 270Q470 280 460 272L300 162L140 272Q130 280 122 270Q110 274 106 262Z"/>
+${garlands([[134, 281, 300, 176, 9, 6], [300, 176, 466, 281, 9, 6], [154, 398, 446, 398, 16, -4]])}
+<circle class="wreath" cx="299" cy="330" r="15"/><circle class="b1" cx="293" cy="318" r="4"/><circle class="b1" cx="305" cy="318" r="4"/>
 </g>`
 
 // A shooting star: a short streak that crosses in the first second of each cycle.
@@ -182,9 +249,17 @@ export const CABIN_SCENE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 .warm{fill:#ffa04a;opacity:.1}
 .puff{fill:#c5d3ea}
 .snow1{fill:#fff;opacity:.9}.snow2{fill:#dbe7ff;opacity:.6}.snow3{fill:#fff;opacity:.5}
+.wire{stroke:#0e1a10;stroke-width:2;fill:none}
+.b1{fill:#ff4d5e}.b2{fill:#ffd34d}.b3{fill:#4dff9a}.b4{fill:#5ec8ff}
+.star{fill:#ffd34d}.starglow{fill:#ffe48a;opacity:.12}
+.g1{fill:#c8424b}.g2{fill:#2f7fd0}.g3{fill:#3f9a7a}.ribbon{stroke:#ffd34d;stroke-width:4;fill:none}.bow{fill:#ffd34d}
+.sm{fill:#eef4ff}.hat{fill:#1a1420}.scarf{fill:#c8424b}.carrot{fill:#ff8a2a}.coal{fill:#1a1420}.arm{stroke:#3a2c22;stroke-width:4;stroke-linecap:round;fill:none}
+.wreath{stroke:#1f6b45;stroke-width:7;fill:none}
+.fw1{stroke:#ff6b7a;fill:#ffd0d5;stroke-width:3;stroke-linecap:round}.fw2{stroke:#ffd34d;fill:#fff1b8;stroke-width:3;stroke-linecap:round}.fw3{stroke:#6bf0ff;fill:#d6fbff;stroke-width:3;stroke-linecap:round}
 @media (prefers-color-scheme: light){
 .sky{fill:#dde8f5}.shade{fill:#8fb0db;opacity:.55}
-.stars,.sparks,.aurora,.shoot{display:none}
+.stars,.sparks,.aurora,.shoot,.fireworks{display:none}
+.sm{fill:#ffffff}.wire{stroke:#2a3a2a}
 .moon{fill:#fff8e6}.halo{fill:#fffbe8;opacity:.18}
 .far{fill:#9fb8da}.farsnow{fill:#eef4fc}
 .hill{fill:#c9d9ee}.hill2{fill:#dfe9f6}.ground{fill:#f4f8fd}.groundlit{fill:#fff}
@@ -201,6 +276,7 @@ ${sky()}
 <g class="stars">${stars()}</g>
 <g class="sparks"><g>${anim('opacity', '.2;1;.2', 3)}${spark(520, 90, 16)}${spark(1270, 170, 15)}</g><g>${anim('opacity', '1;.2;1', 3.8)}${spark(1040, 70, 18)}${spark(1450, 60, 13)}${spark(420, 300, 11)}</g></g>
 <g class="shoot">${SHOOT}</g>
+<g class="fireworks">${burst(700, 170, 95, 'fw1', 7, 0)}${burst(1180, 110, 75, 'fw2', 7, 2.4)}${burst(930, 250, 60, 'fw3', 7, 4.8)}</g>
 <g>${anim('opacity', '.6;1;.6', 7)}${glow(250, 150, 160, 'halo')}<circle class="halo" cx="250" cy="150" r="70"/></g>
 <circle class="moon" cx="250" cy="150" r="44"/>
 <path class="far" d="M0 560L120 470L210 520L330 420L450 510L560 455L700 540L820 470L960 545L1080 450L1210 520L1330 440L1460 510L1600 460L1600 900L0 900Z"/>
@@ -210,6 +286,9 @@ ${sky()}
 ${pine(70, 690, 300)}${pine(170, 715, 230)}${pine(1560, 690, 260)}${pine(1470, 700, 180)}
 <path class="ground" d="M0 790Q400 740 800 785T1600 770L1600 900L0 900Z"/>
 ${CABIN}
+${yolka(800, 815, 300)}
+${gift(735, 788, 40, 30, 'g1')}${gift(785, 796, 30, 22, 'g2')}${gift(825, 784, 46, 34, 'g3')}
+${snowman(600, 830)}
 <path class="groundlit" d="M0 845Q500 815 1000 840T1600 830L1600 900L0 900Z"/>
 <g>${slide('-25 0;25 0;-25 0', 11)}
 ${snowLayer('snow2', 24, 2, 3, 20)}
